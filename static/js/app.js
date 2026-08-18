@@ -42,9 +42,7 @@ async function initDashboard(){
   $("dashDrone").textContent=data.mission.drone_id;
   $("dashMode").textContent=data.mission.flight_mode;
   $("dashboardPairs").innerHTML=data.pairs.slice(0,3).map(p=>pairCard(p,true)).join("")||`<p>No image pairs found.</p>`;
-  const telemetry=[
-    ["Battery",`${data.mission.battery}%`],["Signal",`${data.mission.signal}%`],["Altitude",`${data.gps.altitude_m} m`],["Wind",data.mission.wind],["Ambient",data.mission.ambient_temperature],["Humidity",data.mission.humidity]
-  ];
+  const telemetry=[["Battery",`${data.mission.battery}%`],["Signal",`${data.mission.signal}%`],["Altitude",`${data.gps.altitude_m} m`],["Wind",data.mission.wind],["Ambient",data.mission.ambient_temperature],["Humidity",data.mission.humidity]];
   $("telemetryCards").innerHTML=telemetry.map(([k,v])=>`<div class="telemetry-card"><span>${k}</span><strong>${v}</strong></div>`).join("");
   $("capabilities").innerHTML=data.capabilities.map(x=>`<div class="capability">✓ ${escapeHtml(x)}</div>`).join("");
 }
@@ -74,12 +72,43 @@ let libraryPairs=[];
 async function initLibrary(){ const data=await getJson("/api/pairs"); libraryPairs=data.pairs; renderLibrary(); $("librarySearch").addEventListener("input",renderLibrary);$("libraryFilter").addEventListener("change",renderLibrary);$("refreshLibrary").addEventListener("click",async()=>{const fresh=await getJson("/api/pairs");libraryPairs=fresh.pairs;renderLibrary();toast("Evidence library refreshed.")}); }
 function renderLibrary(){ const q=($("librarySearch").value||"").toLowerCase(),filter=$("libraryFilter").value;const filtered=libraryPairs.filter(p=>(filter==="all"||p.pairing===filter)&&(`${p.label} ${p.before.name} ${p.after.name}`.toLowerCase().includes(q)));$("libraryCount").textContent=`${filtered.length} pairs`;$("pairLibrary").innerHTML=filtered.map(p=>pairCard(p,false)).join("")||`<p>No matching evidence pairs.</p>`; }
 
-async function initBatch(){ const data=await getJson("/api/pairs"); catalog.pairs=data.pairs; $("batchPairs").textContent=data.pairs.length; $("batchResults").innerHTML=data.pairs.map(p=>`<div class="batch-row"><img src="${p.after.url}"><div><strong>${escapeHtml(p.label)}</strong><small>${escapeHtml(p.before.name)} → ${escapeHtml(p.after.name)}</small></div><strong>Queued</strong><small>--</small><small>--</small><small>--</small></div>`).join("");$("runBatch").addEventListener("click",runBatch); }
-async function runBatch(){ const btn=$("runBatch");btn.disabled=true;btn.textContent="Processing…";$("batchProgress").style.width="35%";try{const data=await getJson("/api/batch/analyze",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pair_ids:catalog.pairs.map(p=>p.id)})});$("batchProgress").style.width="100%";$("batchProcessed").textContent=data.summary.processed;$("batchFires").textContent=data.summary.fire_count;$("batchConfidence").textContent=`${data.summary.average_confidence}%`;$("batchResults").innerHTML=data.results.map((r,i)=>{const pair=catalog.pairs.find(p=>p.id===r.pair_id);return `<div class="batch-row"><img src="${r.result_url||pair?.after.url||""}" data-preview="${r.result_url||pair?.after.url||""}" data-caption="${escapeHtml(r.pair_label||pair?.label||"")}"><div><strong>${escapeHtml(r.pair_label||pair?.label||r.pair_id)}</strong><small>${r.ok?escapeHtml(r.status):escapeHtml(r.error)}</small></div><strong>${r.ok?`${r.confidence}%`:"Failed"}</strong><small>${r.severity||"--"}</small><small>${r.bbox_count??"--"} regions</small><small>${r.processing_ms?`${r.processing_ms} ms`:"--"}</small></div>`}).join("");toast(`Batch complete: ${data.summary.fire_count} fire detections.`);}catch(err){toast(err.message,true)}finally{btn.disabled=false;btn.textContent="Analyze All Pairs";}}
+function queuedBatchRow(pair){
+  return `<div class="batch-row">
+    <div class="batch-evidence"><img src="${pair.before.url}" data-preview="${pair.before.url}" data-caption="Before fire · ${escapeHtml(pair.before.name)}"><img src="${pair.after.url}" data-preview="${pair.after.url}" data-caption="After/current · ${escapeHtml(pair.after.name)}"></div>
+    <div class="batch-meta"><strong>${escapeHtml(pair.label)}</strong><small>${escapeHtml(pair.id)} · ${escapeHtml(pair.before.name)} → ${escapeHtml(pair.after.name)}</small><span class="batch-location">GPS ${pair.latitude}, ${pair.longitude} · ${pair.altitude_m} m</span></div>
+    <span class="status-chip">Queued</span><strong>--</strong><small>--</small><small>--</small>
+  </div>`;
+}
+function analyzedBatchRow(result,pair){
+  const evidence=result.result_url||pair?.after.url||"";
+  return `<div class="batch-row">
+    <div class="batch-evidence"><img src="${pair?.before.url||result.reference_url||""}" data-preview="${pair?.before.url||result.reference_url||""}" data-caption="Before fire · ${escapeHtml(result.reference_image||pair?.before.name||"")}"><img src="${evidence}" data-preview="${evidence}" data-caption="Detected evidence · ${escapeHtml(result.event_id||"")}"></div>
+    <div class="batch-meta"><strong>${escapeHtml(result.pair_label||pair?.label||result.pair_id)}</strong><small>Event ${escapeHtml(result.event_id||"--")} · ${escapeHtml(result.reference_image||pair?.before.name||"")} → ${escapeHtml(result.current_image||pair?.after.name||"")}</small><span class="batch-location">GPS ${escapeHtml(result.latitude||pair?.latitude||"--")}, ${escapeHtml(result.longitude||pair?.longitude||"--")} · ${escapeHtml(result.altitude_m||pair?.altitude_m||"--")} m</span></div>
+    <span class="status-chip ${result.fire_detected?"fire":""}">${escapeHtml(result.ok?result.status:"Failed")}</span>
+    <strong>${result.ok?`${escapeHtml(result.confidence)}%`:"--"}</strong>
+    <small>${escapeHtml(result.severity||"--")} · ${escapeHtml(result.bbox_count??"--")} region(s)</small>
+    <small>${result.processing_ms?`${escapeHtml(result.processing_ms)} ms`:"--"}</small>
+  </div>`;
+}
+async function initBatch(){ const data=await getJson("/api/pairs"); catalog.pairs=data.pairs; $("batchPairs").textContent=data.pairs.length; $("batchProcessed").textContent="0"; $("batchFires").textContent="0"; $("batchConfidence").textContent="--"; $("batchResults").innerHTML=data.pairs.map(queuedBatchRow).join("");$("runBatch").addEventListener("click",runBatch); }
+async function runBatch(){ const btn=$("runBatch");btn.disabled=true;btn.textContent="Processing…";$("batchProgress").style.width="35%";try{const data=await getJson("/api/batch/analyze",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pair_ids:catalog.pairs.map(p=>p.id)})});$("batchProgress").style.width="100%";$("batchProcessed").textContent=data.summary.processed;$("batchFires").textContent=data.summary.fire_count;$("batchConfidence").textContent=`${data.summary.average_confidence}%`;$("batchResults").innerHTML=data.results.map(r=>analyzedBatchRow(r,catalog.pairs.find(p=>p.id===r.pair_id))).join("");toast(`Batch complete: ${data.summary.fire_count} fire detections.`);}catch(err){toast(err.message,true)}finally{btn.disabled=false;btn.textContent="Analyze All Pairs";}}
 
-let allEvents=[];
-async function initEvents(){ const data=await getJson("/api/events?limit=250");allEvents=data.events;renderEvents();$("eventSearch").addEventListener("input",renderEvents);$("severityFilter").addEventListener("change",renderEvents); }
-function renderEvents(){const q=($("eventSearch").value||"").toLowerCase(),severity=$("severityFilter").value;const rows=allEvents.filter(e=>(!severity||e.severity===severity)&&(`${e.event_id} ${e.status} ${e.reference_image} ${e.current_image}`.toLowerCase().includes(q)));$("eventRows").innerHTML=rows.map(e=>`<tr><td>${escapeHtml(e.timestamp)}</td><td>${escapeHtml(e.status)}</td><td>${escapeHtml(e.severity)}</td><td>${escapeHtml(e.confidence)}%</td><td>${escapeHtml(e.latitude)}, ${escapeHtml(e.longitude)}</td><td>${e.result_url?`<span class="evidence-link" data-preview="${e.result_url}" data-caption="Event ${escapeHtml(e.event_id)}">View</span>`:"--"}</td></tr>`).join("")||`<tr><td colspan="6">No events found.</td></tr>`;}
+let allEvents=[]; let eventPairs=[];
+async function initEvents(){ const [eventData,pairData]=await Promise.all([getJson("/api/events?limit=250"),getJson("/api/pairs")]);allEvents=eventData.events;eventPairs=pairData.pairs;renderEvents();$("eventSearch").addEventListener("input",renderEvents);$("severityFilter").addEventListener("change",renderEvents); }
+function eventPair(event){ return eventPairs.find(p=>p.before.name===event.reference_image&&p.after.name===event.current_image); }
+function renderEvents(){
+  const q=($("eventSearch").value||"").toLowerCase(),severity=$("severityFilter").value;
+  const rows=allEvents.filter(e=>(!severity||e.severity===severity)&&(`${e.event_id} ${e.status} ${e.reference_image} ${e.current_image} ${e.latitude} ${e.longitude}`.toLowerCase().includes(q)));
+  $("eventRows").innerHTML=rows.map(e=>{const pair=eventPair(e);const result=e.result_url||e.current_url;return `<tr>
+    <td><strong>${escapeHtml(pair?.label||"Detection Event")}</strong><div class="event-id">${escapeHtml(e.event_id||"--")}</div></td>
+    <td>${escapeHtml(e.timestamp||"--")}</td>
+    <td><div class="event-evidence">${e.reference_url?`<img src="${e.reference_url}" data-preview="${e.reference_url}" data-caption="Before fire · ${escapeHtml(e.reference_image)}">`:""}${e.current_url?`<img src="${e.current_url}" data-preview="${e.current_url}" data-caption="Current/fire · ${escapeHtml(e.current_image)}">`:""}</div><small>${escapeHtml(e.reference_image||"--")} → ${escapeHtml(e.current_image||"--")}</small></td>
+    <td><span class="status-chip ${(e.status||"").includes("FIRE DETECTED")?"fire":""}">${escapeHtml(e.status||"--")}</span><small>${escapeHtml(e.severity||"--")}</small></td>
+    <td><div class="metric-stack-inline"><span>${escapeHtml(e.confidence||"--")}% confidence</span><span>${escapeHtml(e.bbox_count||"--")} region(s)</span><span>${escapeHtml(e.hotspot_area_percent||"--")}% area</span><span>${escapeHtml(e.processing_ms||"--")} ms</span></div></td>
+    <td>${escapeHtml(e.latitude||"--")}, ${escapeHtml(e.longitude||"--")}<small>${escapeHtml(e.altitude_m||"--")} m · ${String(e.gps_valid).toLowerCase()==="true"?"GPS valid":"GPS not fixed"}</small></td>
+    <td>${result?`<div class="event-evidence"><img src="${result}" data-preview="${result}" data-caption="Result evidence · ${escapeHtml(e.event_id)}">${e.diff_url?`<img src="${e.diff_url}" data-preview="${e.diff_url}" data-caption="Thermal difference · ${escapeHtml(e.event_id)}">`:""}${e.mask_url?`<img src="${e.mask_url}" data-preview="${e.mask_url}" data-caption="Hotspot mask · ${escapeHtml(e.event_id)}">`:""}</div>`:"--"}</td>
+  </tr>`}).join("")||`<tr><td colspan="7">No events found.</td></tr>`;
+}
 
 async function initMission(){ const data=await getJson("/api/dashboard");$("missionDrone").textContent=data.mission.drone_id;$("missionZone").textContent=data.mission.zone;const t=[["Battery",`${data.mission.battery}%`],["Signal",`${data.mission.signal}%`],["Altitude",`${data.gps.altitude_m} m`],["Wind",data.mission.wind],["Ambient",data.mission.ambient_temperature],["Humidity",data.mission.humidity],["Flight Mode",data.mission.flight_mode],["Camera",data.mission.camera],["Edge Node",data.mission.edge_node],["GPS",data.mission.gps_module]];$("missionTelemetry").innerHTML=t.map(([k,v])=>`<div><span>${k}</span><strong>${escapeHtml(v)}</strong></div>`).join(""); }
 
