@@ -1,8 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="panel glass">
-  <div class="panel-head"><div><span class="eyebrow">Traceability</span><h2>Fire Event History</h2><p>Review GPS-tagged detection records, confidence, severity and captured evidence.</p></div><a href="/api/logs/download" class="btn secondary">Export CSV</a></div>
-  <div class="event-toolbar"><input id="eventSearch" type="search" placeholder="Search event, image or status…"><select id="severityFilter"><option value="">All severities</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option><option>NORMAL</option></select></div>
-  <div class="table-wrap"><table class="event-table"><thead><tr><th>Time</th><th>Status</th><th>Severity</th><th>Confidence</th><th>GPS</th><th>Evidence</th></tr></thead><tbody id="eventRows"></tbody></table></div>
+  <div class="panel-head">
+    <div>
+      <span class="eyebrow">Traceability</span>
+      <h2>Fire Event History</h2>
+      <p>Review each detection record with reference/current evidence, GPS coordinates, confidence, severity, detected regions and processing latency.</p>
+    </div>
+    <a href="/api/logs/download" class="btn secondary">Export CSV</a>
+  </div>
+  <div class="event-toolbar">
+    <input id="eventSearch" type="search" placeholder="Search event ID, image, status or GPS…">
+    <select id="severityFilter"><option value="">All severities</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option><option>NORMAL</option></select>
+  </div>
+  <div class="table-wrap">
+    <table class="event-table">
+      <thead><tr><th>Event</th><th>Time</th><th>Before / After</th><th>Status</th><th>Detection Metrics</th><th>GPS / Altitude</th><th>Result Evidence</th></tr></thead>
+      <tbody id="eventRows"></tbody>
+    </table>
+  </div>
 </section>
 {% endblock %}
