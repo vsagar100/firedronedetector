@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }} · Drone Fire Detection</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body data-page="{{ page }}">
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <div class="shell">
+    <aside class="sidebar glass">
+      <a class="brand" href="/"><span class="brand-mark">🔥</span><span><strong>FireDrone</strong><small>Monitoring Console</small></span></a>
+      <nav class="side-nav">
+        <a href="/" class="{% if page == 'dashboard' %}active{% endif %}"><span>◫</span>Dashboard</a>
+        <a href="/detection" class="{% if page == 'detection' %}active{% endif %}"><span>◎</span>Fire Detection</a>
+        <a href="/library" class="{% if page == 'library' %}active{% endif %}"><span>▦</span>Evidence Library</a>
+        <a href="/batch" class="{% if page == 'batch' %}active{% endif %}"><span>⚡</span>Batch Analysis</a>
+        <a href="/events" class="{% if page == 'events' %}active{% endif %}"><span>≡</span>Event History</a>
+        <a href="/mission" class="{% if page == 'mission' %}active{% endif %}"><span>⌖</span>Mission & Telemetry</a>
+        <a href="/settings" class="{% if page == 'settings' %}active{% endif %}"><span>⚙</span>Settings</a>
+      </nav>
+      <div class="side-foot">
+        <span class="status-dot"></span><div><strong>UAV-FD-07</strong><small>Edge–Cloud Sync Active</small></div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar glass">
+        <div><span class="eyebrow">Secure Edge–Cloud Fire Monitoring</span><h1>{{ page_title }}</h1></div>
+        <div class="top-actions"><span class="pill live"><i></i>Telemetry Online</span><span id="clock" class="clock"></span></div>
+      </header>
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <div id="imageModal" class="modal"><div class="modal-card image-modal-card"><button class="close" data-close-modal>×</button><img id="modalImage" alt="Evidence preview"><div id="modalCaption"></div></div></div>
+  <script src="/static/js/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
