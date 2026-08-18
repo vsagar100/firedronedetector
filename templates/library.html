@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel glass">
+  <div class="panel-head"><div><span class="eyebrow">Evidence Repository</span><h2>Before & After Fire Image Library</h2><p>Thermal baseline frames and fire frames are paired from the application image folders and presented as mission evidence.</p></div><button id="refreshLibrary" class="btn secondary">Refresh Frames</button></div>
+  <div class="library-toolbar"><input id="librarySearch" type="search" placeholder="Search image name or pair…"><select id="libraryFilter"><option value="all">All pairs</option><option value="number-match">Number matched</option><option value="scene-match">Scene matched</option><option value="sequence-pair">Sequence paired</option></select><span id="libraryCount" class="badge">0 pairs</span></div>
+  <div id="pairLibrary" class="library-grid"></div>
+</section>
+{% endblock %}
