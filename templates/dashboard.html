@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero-grid">
+  <article class="hero-card glass">
+    <div><span class="eyebrow">Mission Control</span><h2>Real-time thermal fire surveillance</h2><p>Monitor the active UAV mission, compare thermal evidence and review GPS-tagged fire events from one command view.</p></div>
+    <div class="hero-actions"><a class="btn primary" href="/detection">Run Detection</a><a class="btn secondary" href="/library">Open Evidence Library</a></div>
+  </article>
+  <article class="mission-mini glass">
+    <div class="radar"><span></span><span></span><span></span><b></b></div>
+    <div><small>Active UAV</small><strong id="dashDrone">UAV-FD-07</strong><em id="dashMode">Auto Surveillance</em></div>
+  </article>
+</section>
+<section class="stats-grid">
+  <article class="stat glass"><span>Thermal Pairs</span><strong id="statPairs">--</strong><small>Before / after comparisons</small></article>
+  <article class="stat glass"><span>Fire Events</span><strong id="statFires">--</strong><small>Detected alert records</small></article>
+  <article class="stat glass"><span>System Health</span><strong id="statHealth">--</strong><small>Edge + telemetry services</small></article>
+  <article class="stat glass"><span>GPS</span><strong id="statGps">--</strong><small id="statCoords">Awaiting telemetry</small></article>
+</section>
+<section class="dashboard-grid">
+  <article class="panel glass">
+    <div class="panel-head"><div><span class="eyebrow">Recent Evidence</span><h2>Before → After Fire</h2></div><a href="/library">View all</a></div>
+    <div id="dashboardPairs" class="pair-strip"></div>
+  </article>
+  <article class="panel glass">
+    <div class="panel-head"><div><span class="eyebrow">Platform</span><h2>Mission Telemetry</h2></div><a href="/mission">Details</a></div>
+    <div id="telemetryCards" class="telemetry-cards"></div>
+  </article>
+</section>
+<section class="panel glass">
+  <div class="panel-head"><div><span class="eyebrow">Research Prototype</span><h2>Demonstrated Capabilities</h2></div></div>
+  <div id="capabilities" class="capability-grid"></div>
+</section>
+{% endblock %}
