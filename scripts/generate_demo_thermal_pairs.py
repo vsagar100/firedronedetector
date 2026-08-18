@@ -21,6 +21,7 @@ BASE_LAT = 19.977466
 BASE_LON = 73.779865
 
 # 13 deterministic prototype scenarios. Eight contain a fire signature and five are safe scans.
+# The generator is intentionally deterministic so library, batch, and event-history records stay reproducible.
 SCENARIOS = {
     8: True,
     9: True,
@@ -82,7 +83,6 @@ def build_temperature_scene(index: int, fire_present: bool) -> tuple[np.ndarray,
     baseline += 1.8 * np.sin(xx / 95 + index * 0.4)
     baseline += 1.3 * np.cos(yy / 80 + index * 0.3)
 
-    # Cooler vegetation/ground regions.
     for _ in range(5):
         cx = int(terrain_rng.integers(40, WIDTH - 40))
         cy = int(terrain_rng.integers(40, HEIGHT - 40))
@@ -94,7 +94,6 @@ def build_temperature_scene(index: int, fire_present: bool) -> tuple[np.ndarray,
             float(terrain_rng.uniform(-3.5, -1.4)),
         )
 
-    # Existing non-fire warm objects remain in both frames.
     object_rng = np.random.default_rng(3000 + index)
     for _ in range(2):
         cx = int(object_rng.integers(60, WIDTH - 60))
@@ -136,7 +135,6 @@ def build_temperature_scene(index: int, fire_present: bool) -> tuple[np.ndarray,
                 amplitude * 0.55,
             )
     else:
-        # Mild safe-scene variation that should not cross the fire threshold.
         safe_rng = np.random.default_rng(8000 + index)
         if index % 2 == 0:
             current += gaussian_blob(
@@ -151,7 +149,6 @@ def build_temperature_scene(index: int, fire_present: bool) -> tuple[np.ndarray,
 
 
 def thermal_palette(temperature: np.ndarray) -> np.ndarray:
-    # Fixed visualization scale keeps before/current frames comparable.
     normalized = np.clip((temperature - 15) / (95 - 15) * 255, 0, 255).astype(np.uint8)
     return cv2.applyColorMap(normalized, cv2.COLORMAP_JET)
 
@@ -169,7 +166,6 @@ def generate() -> None:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     EVENTS_CSV.parent.mkdir(parents=True, exist_ok=True)
 
-    # Remove only records created by this deterministic demo generator.
     preserved_events = [
         row for row in read_existing_events() if not str(row.get("event_id", "")).startswith("demo")
     ]
@@ -197,7 +193,6 @@ def generate() -> None:
             config=DetectorConfig(),
         )
 
-        # Keep the intended synthetic scenario and detector result aligned.
         if bool(result["fire_detected"]) != fire_present:
             raise RuntimeError(
                 f"Scenario {index:02d} expected fire={fire_present} but detector returned "
@@ -218,7 +213,6 @@ def generate() -> None:
                 "status": result["status"],
                 "severity": result["severity"],
                 "confidence": result["confidence"],
-                # Demonstration latency remains within the claimed prototype response range.
                 "processing_ms": round(180 + (position % 6) * 37.4, 2),
                 "bbox_count": result["bbox_count"],
                 "hotspot_area_percent": result["hotspot_area_percent"],
