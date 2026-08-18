@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mission-layout">
+  <article class="panel glass">
+    <div class="panel-head"><div><span class="eyebrow">UAV Platform</span><h2>Mission & Telemetry</h2></div><span class="pill live"><i></i>Link Active</span></div>
+    <div class="mission-hero"><div class="radar large"><span></span><span></span><span></span><b></b></div><div><small>Drone</small><h3 id="missionDrone">UAV-FD-07</h3><p id="missionZone">Nashik Thermal Surveillance Zone</p><div class="cloud-tags"><span>LWIR Thermal</span><span>GPS</span><span>Edge Processing</span><span>Encrypted Telemetry</span></div></div></div>
+  </article>
+  <article class="panel glass"><span class="eyebrow">Current Telemetry</span><h2>Flight Parameters</h2><div id="missionTelemetry" class="telemetry-grid"></div></article>
+</section>
+<section class="panel glass"><div class="panel-head"><div><span class="eyebrow">Architecture</span><h2>Edge–Cloud Processing Flow</h2></div></div><div class="architecture-flow"><div>Thermal Camera<small>LWIR capture</small></div><b>→</b><div>Raspberry Pi<small>Frame processing</small></div><b>→</b><div>Fire Detector<small>Hotspot validation</small></div><b>→</b><div>GPS Event<small>Geo-tagging</small></div><b>→</b><div>Cloud Console<small>Alert + evidence</small></div></div></section>
+{% endblock %}
