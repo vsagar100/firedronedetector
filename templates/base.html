@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ page_title }} · Drone Fire Detection</title>
+  <title>{{ page_title }} · Edge–Cloud UAV Fire Detection</title>
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="/static/css/pages.css">
 </head>
@@ -11,7 +11,7 @@
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
   <div class="shell">
     <aside class="sidebar glass">
-      <a class="brand" href="/"><span class="brand-mark">🔥</span><span><strong>FireDrone</strong><small>Monitoring Console</small></span></a>
+      <a class="brand" href="/"><span class="brand-mark">🔥</span><span><strong>Edge–Cloud UAV Fire Detection</strong><small>Thermal Detection & Geo-Tagged Alerting</small></span></a>
       <nav class="side-nav">
         <a href="/" class="{% if page == 'dashboard' %}active{% endif %}"><span>◫</span>Dashboard</a>
         <a href="/detection" class="{% if page == 'detection' %}active{% endif %}"><span>◎</span>Fire Detection</a>
@@ -28,7 +28,7 @@
 
     <main class="content">
       <header class="topbar glass">
-        <div><span class="eyebrow">Secure Edge–Cloud Fire Monitoring</span><h1>{{ page_title }}</h1></div>
+        <div><span class="eyebrow">Real-Time Thermal-Based Fire Detection and Geo-Tagged Alerting</span><h1>{{ page_title }}</h1></div>
         <div class="top-actions"><span class="pill live"><i></i>Telemetry Online</span><span id="clock" class="clock"></span></div>
       </header>
       {% block content %}{% endblock %}
