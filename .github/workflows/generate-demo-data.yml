@@ -7,6 +7,7 @@ on:
       - feature/multi-screen-dashboard
     paths:
       - scripts/generate_demo_thermal_pairs.py
+      - scripts/__init__.py
       - .github/workflows/generate-demo-data.yml
 
 permissions:
@@ -33,7 +34,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Generate 13 thermal comparison pairs and event evidence
-        run: python scripts/generate_demo_thermal_pairs.py
+        run: python -m scripts.generate_demo_thermal_pairs
 
       - name: Commit generated image dataset
         run: |
