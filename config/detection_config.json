@@ -1,0 +1,8 @@
+{
+  "min_area_percent": 0.08,
+  "confidence_threshold": 45,
+  "min_delta_threshold": 35,
+  "heat_gate": 85,
+  "morph_kernel": 5,
+  "top_contours": 8
+}

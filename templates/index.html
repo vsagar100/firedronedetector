@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Drone Fire Detection Cloud Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/batch.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <main class="app">
+    <header class="hero">
+      <nav class="nav glass">
+        <div class="brand">
+          <div class="brand-icon">🔥</div>
+          <div><strong>Drone Fire Detection</strong><span>Cloud Monitoring Console</span></div>
+        </div>
+        <div class="nav-status">
+          <span class="pill live"><i></i> Live Telemetry</span>
+          <span class="pill">Secure Cloud Sync</span>
+          <span id="clock" class="clock"></span>
+        </div>
+      </nav>
+
+      <section class="hero-card glass">
+        <div class="hero-copy">
+          <span class="eyebrow">Mission Control</span>
+          <h1>Thermal Fire Detection Dashboard</h1>
+          <p>Cloud-style command view for drone captured thermal imagery, GPS-tagged fire alerting, evidence capture and event traceability.</p>
+          <div class="hero-actions">
+            <button id="analyzeBtn" class="primary">Run Fire Analysis</button>
+            <button id="refreshBtn" class="secondary">Refresh Mission Frames</button>
+          </div>
+        </div>
+        <div class="mission-card">
+          <div class="mission-top"><span id="droneId">UAV-FD-07</span><b id="healthState">Connecting...</b></div>
+          <div class="radar"><span></span><span></span><span></span><div class="radar-dot"></div></div>
+          <div class="mission-grid">
+            <div><small>Battery</small><strong id="batteryVal">82%</strong></div>
+            <div><small>Signal</small><strong id="signalVal">94%</strong></div>
+            <div><small>Altitude</small><strong id="altDisplay">18.5 m</strong></div>
+            <div><small>Mode</small><strong id="modeVal">Auto</strong></div>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <section class="summary-row">
+      <article class="summary glass"><span>Alert Status</span><strong id="statusText">Standby</strong><small id="statusSub">Awaiting frame analysis</small></article>
+      <article class="summary glass"><span>Confidence</span><strong id="confidenceText">--</strong><small>Detection probability</small></article>
+      <article class="summary glass"><span>Location</span><strong id="gpsText">GPS pending</strong><small id="coordText">--</small></article>
+      <article class="summary glass"><span>Response Time</span><strong id="latencyText">--</strong><small>Processing latency</small></article>
+    </section>
+
+    <section class="main-grid">
+      <section class="panel glass comparison-panel">
+        <div class="panel-head"><div><span class="eyebrow">Before / After Evidence</span><h2>Same Area Thermal Comparison</h2></div><span id="comparisonBadge" class="badge">Reference vs Current</span></div>
+        <div class="compare-view">
+          <article class="frame-card"><div class="frame-label safe">Before Fire</div><div class="image-box"><img id="refImg" alt="Reference scene"></div><p id="refName">Reference thermal scene</p></article>
+          <div class="compare-arrow"><span>Cloud Analysis</span><b>→</b></div>
+          <article class="frame-card"><div class="frame-label danger">With Fire / Current</div><div class="image-box"><img id="curImg" alt="Current scene"></div><p id="curName">Current thermal scene</p></article>
+        </div>
+      </section>
+
+      <aside class="panel glass controls-panel">
+        <div class="panel-head slim"><div><span class="eyebrow">Mission Input</span><h2>Frame Pair</h2></div></div>
+        <label>Reference thermal frame</label><select id="referenceSelect"></select>
+        <label>Current thermal frame</label><select id="currentSelect"></select>
+        <div class="gps-box"><div><small>Latitude</small><input id="latInput" type="number" step="0.000001"></div><div><small>Longitude</small><input id="lonInput" type="number" step="0.000001"></div></div>
+        <label>Altitude</label><input id="altInput" type="number" step="0.1">
+        <details><summary>Advanced detector tuning</summary>
+          <label>Minimum hotspot area <b id="minAreaVal"></b></label><input id="minArea" type="range" min="0.01" max="2.0" step="0.01">
+          <label>Alert confidence threshold <b id="confThVal"></b></label><input id="confTh" type="range" min="10" max="95" step="1">
+          <label>Thermal heat gate <b id="heatGateVal"></b></label><input id="heatGate" type="range" min="20" max="220" step="1">
+        </details>
+        <div id="messageBox" class="message"></div>
+      </aside>
+    </section>
+
+    <section class="panel glass batch-panel">
+      <div class="panel-head batch-head">
+        <div><span class="eyebrow">Multi-frame Pipeline</span><h2>Batch Comparison Gallery</h2><p class="panel-copy">Configure multiple reference/current pairs and process the complete mission set through the same thermal detection pipeline.</p></div>
+        <div class="batch-actions"><button id="addPairBtn" class="secondary compact">+ Add Pair</button><button id="runBatchBtn" class="primary compact">Analyze Batch</button></div>
+      </div>
+      <div class="batch-overview">
+        <div><small>Queue</small><strong id="batchQueueCount">0 pairs</strong></div>
+        <div><small>Fire detections</small><strong id="batchFireCount">--</strong></div>
+        <div><small>Average confidence</small><strong id="batchConfidence">--</strong></div>
+        <div><small>Total compute</small><strong id="batchLatency">--</strong></div>
+        <div class="batch-progress-wrap"><span><b id="batchProgressLabel">Ready</b><em id="batchProgressValue">0%</em></span><div class="batch-progress"><i id="batchProgressBar"></i></div></div>
+      </div>
+      <div id="batchGallery" class="batch-gallery"></div>
+    </section>
+
+    <section class="main-grid lower">
+      <section class="panel glass output-panel">
+        <div class="panel-head"><div><span class="eyebrow">Detection Result</span><h2>Annotated Fire Evidence</h2></div><a id="downloadResult" href="#" download class="download disabled">Download Evidence</a></div>
+        <div class="result-layout">
+          <div class="result-image"><img id="resultImg" alt="Annotated detection output"></div>
+          <div class="result-details"><div class="detail-tile danger"><small>Severity</small><strong id="severityText">--</strong></div><div class="detail-tile"><small>Detected Regions</small><strong id="bboxMetric">--</strong></div><div class="detail-tile"><small>Hotspot Area</small><strong id="areaMetric">--</strong></div><div class="detail-tile"><small>Thermal Contrast</small><strong id="contrastMetric">--</strong></div></div>
+        </div>
+      </section>
+      <aside class="panel glass timeline-panel"><div class="panel-head slim"><div><span class="eyebrow">Event Stream</span><h2>Recent Alerts</h2></div><a href="/api/logs/download" class="mini-link">Export CSV</a></div><div id="events" class="events"></div></aside>
+    </section>
+
+    <section class="panel glass diagnostic-panel">
+      <div class="panel-head"><div><span class="eyebrow">Analysis Layers</span><h2>What changed between the frames?</h2></div><span class="badge">Optional diagnostic view</span></div>
+      <div class="diagnostic-grid"><article><h3>Thermal Difference</h3><div class="mini-image"><img id="diffImg" alt="Thermal difference"></div></article><article><h3>Filtered Hotspot Mask</h3><div class="mini-image"><img id="maskImg" alt="Hotspot mask"></div></article><article class="explain"><h3>Cloud Decision Summary</h3><p id="decisionText">The system compares a reference non-fire thermal frame with the current drone frame and highlights newly developed high-thermal-contrast regions.</p><div class="cloud-tags"><span>LWIR Thermal</span><span>GPS Alert</span><span>Evidence Stored</span><span>Cloud Sync</span></div></article></div>
+    </section>
+  </main>
+
+  <div id="alertModal" class="modal"><div class="modal-card"><button id="closeModal" class="close">×</button><div class="flame">🔥</div><h2>Fire Detected</h2><p id="modalDetails"></p></div></div>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
