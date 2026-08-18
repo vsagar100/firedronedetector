@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel glass">
+  <div class="panel-head"><div><span class="eyebrow">Mission Dataset</span><h2>Batch Thermal Analysis</h2><p>Run the detector across all paired before/after thermal frames and review consolidated results.</p></div><button id="runBatch" class="btn primary">Analyze All Pairs</button></div>
+  <div class="stats-grid compact-stats"><article class="stat"><span>Pairs</span><strong id="batchPairs">--</strong></article><article class="stat"><span>Processed</span><strong id="batchProcessed">--</strong></article><article class="stat"><span>Fire Detections</span><strong id="batchFires">--</strong></article><article class="stat"><span>Avg. Confidence</span><strong id="batchConfidence">--</strong></article></div>
+  <div class="progress-track"><i id="batchProgress"></i></div>
+  <div id="batchResults" class="batch-results"></div>
+</section>
+{% endblock %}
