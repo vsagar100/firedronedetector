@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="settings-grid">
+  <article class="panel glass"><span class="eyebrow">Alert Geolocation</span><h2>GPS Defaults</h2><label>Latitude<input id="settingLat" type="number" step="0.000001"></label><label>Longitude<input id="settingLon" type="number" step="0.000001"></label><label>Altitude (m)<input id="settingAlt" type="number" step="0.1"></label><label>Location label<input id="settingLocation" type="text"></label></article>
+  <article class="panel glass"><span class="eyebrow">Detection Pipeline</span><h2>Detector Thresholds</h2><label>Minimum hotspot area (%)<input id="settingArea" type="number" step="0.01"></label><label>Confidence threshold<input id="settingConfidence" type="number" step="1"></label><label>Minimum delta threshold<input id="settingDelta" type="number" step="1"></label><label>Heat gate<input id="settingHeat" type="number" step="1"></label><label>Morphology kernel<input id="settingMorph" type="number" step="1"></label><label>Maximum regions<input id="settingContours" type="number" step="1"></label></article>
+</section>
+<section class="panel glass settings-actions"><div><span class="eyebrow">Configuration</span><h2>Apply Prototype Settings</h2><p>Settings are stored in the application configuration files and reused for subsequent analyses.</p></div><button id="saveSettings" class="btn primary">Save Settings</button></section>
+{% endblock %}
