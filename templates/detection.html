@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="split-layout">
+  <article class="panel glass">
+    <div class="panel-head"><div><span class="eyebrow">Thermal Pair</span><h2>Fire Detection Workspace</h2></div><button id="runDetection" class="btn primary">Analyze Pair</button></div>
+    <div class="selectors-row"><label>Before Fire<select id="referenceSelect"></select></label><label>Current / Fire<select id="currentSelect"></select></label></div>
+    <div class="compare-stage">
+      <div class="compare-frame"><span class="tag safe">Before Fire</span><img id="beforePreview" alt="Before fire thermal image"><small id="beforeName"></small></div>
+      <div class="compare-arrow">→</div>
+      <div class="compare-frame"><span class="tag danger">Current Frame</span><img id="afterPreview" alt="Current thermal image"><small id="afterName"></small></div>
+    </div>
+  </article>
+  <aside class="panel glass">
+    <span class="eyebrow">Alert Metadata</span><h2>GPS & Detector</h2>
+    <label>Latitude<input id="latInput" type="number" step="0.000001"></label>
+    <label>Longitude<input id="lonInput" type="number" step="0.000001"></label>
+    <label>Altitude (m)<input id="altInput" type="number" step="0.1"></label>
+    <details><summary>Advanced detector tuning</summary><label>Min hotspot area<input id="minArea" type="number" step="0.01"></label><label>Confidence threshold<input id="confThreshold" type="number" step="1"></label><label>Heat gate<input id="heatGate" type="number" step="1"></label></details>
+  </aside>
+</section>
+<section id="detectionResult" class="panel glass hidden">
+  <div class="panel-head"><div><span class="eyebrow">Detection Output</span><h2 id="resultStatus">Result</h2></div><a id="downloadEvidence" class="btn secondary" download>Download Evidence</a></div>
+  <div class="result-grid"><div class="result-main"><img id="resultImage" alt="Annotated fire detection result"></div><div class="metrics-stack"><div class="metric"><span>Confidence</span><strong id="resultConfidence">--</strong></div><div class="metric"><span>Severity</span><strong id="resultSeverity">--</strong></div><div class="metric"><span>Response</span><strong id="resultLatency">--</strong></div><div class="metric"><span>Hotspot Area</span><strong id="resultArea">--</strong></div></div></div>
+  <div class="diagnostic-row"><div><span>Thermal Difference</span><img id="differenceImage"></div><div><span>Hotspot Mask</span><img id="maskImage"></div><div class="decision"><span>Decision Summary</span><p id="decisionText"></p></div></div>
+</section>
+{% endblock %}
